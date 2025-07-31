@@ -1,0 +1,891 @@
+.control-group label {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .control-group span {
+            color: #999;
+            font-size: 0.8rem;
+            font-weight: 400;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .preset-buttons {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            padding: 8px 16px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .preset-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: rgba(102, 126, 234, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .drag-instructions {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            margin: 15px 0;
+            color: #856404;
+            font-size: 0.9rem;
+            text-align: center;
+        }<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PFP Logo Overlay</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/face-api.js/0.22.2/face-api.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: rgba(118, 75, 162, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: rgba(118, 75, 162, 0.15);
+            transform: scale(1.02);
+        }
+
+        .upload-text {
+            color: #666;
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .preview-section {
+            display: none;
+            margin: 30px 0;
+        }
+
+        .image-container {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .image-box {
+            text-align: center;
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .image-box h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .image-display {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 100%;
+            height: auto;
+        }
+
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .control-group span {
+            color: #999;
+            font-size: 0.8rem;
+            font-weight: 400;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .preset-buttons {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            padding: 8px 16px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .preset-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: rgba(102, 126, 234, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .drag-instructions {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            margin: 15px 0;
+            color: #856404;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .slider {
+            width: 100px;
+            height: 5px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .canvas-container {
+            display: none;
+        }
+
+        .developer-credit {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 15px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .developer-credit p {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+        }
+
+        .developer-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .developer-link:hover {
+            color: #764ba2;
+            transform: translateY(-1px);
+        }
+
+        .x-icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .image-container {
+                flex-direction: column;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .developer-credit {
+                margin-top: 30px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 PFP Logo Overlay</h1>
+        <p style="color: #666; margin-bottom: 20px;">Upload your profile picture and add a cool diamond logo overlay!</p>
+        
+        <div class="upload-area" id="uploadArea">
+            <div style="font-size: 3rem; margin-bottom: 10px;">📸</div>
+            <div class="upload-text">Click here or drag & drop your image</div>
+            <div style="color: #999; font-size: 0.9rem;">Supports JPG, PNG, GIF • Auto-detects faces for perfect logo placement!</div>
+            <input type="file" id="fileInput" class="file-input" accept="image/*">
+        </div>
+
+        <div class="preview-section" id="previewSection">
+            <div class="controls">
+                <div class="control-group">
+                    <label>Logo Size</label>
+                    <input type="range" id="sizeSlider" class="slider" min="30" max="300" value="100">
+                    <span id="sizeValue">100%</span>
+                </div>
+                <div class="control-group">
+                    <label>X Position</label>
+                    <input type="range" id="xSlider" class="slider" min="0" max="100" value="50">
+                    <span id="xValue">50%</span>
+                </div>
+                <div class="control-group">
+                    <label>Y Position</label>
+                    <input type="range" id="ySlider" class="slider" min="0" max="100" value="30">
+                    <span id="yValue">30%</span>
+                </div>
+                <div class="control-group">
+                    <label>Opacity</label>
+                    <input type="range" id="opacitySlider" class="slider" min="5" max="100" value="80">
+                    <span id="opacityValue">80%</span>
+                </div>
+                <div class="control-group">
+                    <label>Rotation</label>
+                    <input type="range" id="rotationSlider" class="slider" min="0" max="360" value="0">
+                    <span id="rotationValue">0°</span>
+                </div>
+                <div class="control-group">
+                    <label>Border Width</label>
+                    <input type="range" id="borderSlider" class="slider" min="0" max="20" value="8">
+                    <span id="borderValue">8px</span>
+                </div>
+            </div>
+            
+            <div class="preset-buttons">
+                <button class="preset-btn" onclick="applyPreset('topLeft')">Top Left</button>
+                <button class="preset-btn" onclick="applyPreset('topRight')">Top Right</button>
+                <button class="preset-btn" onclick="applyPreset('center')">Center</button>
+                <button class="preset-btn" onclick="applyPreset('bottomLeft')">Bottom Left</button>
+                <button class="preset-btn" onclick="applyPreset('bottomRight')">Bottom Right</button>
+                <button class="preset-btn" onclick="applyPreset('forehead')">Forehead</button>
+            </div>
+            <div class="image-container">
+                <div class="image-box">
+                    <h3>Original</h3>
+                    <img id="originalImage" class="image-display" alt="Original">
+                </div>
+                <div class="image-box">
+                    <h3>With Logo</h3>
+                    <div class="drag-instructions">💡 Click and drag the logo to move it around!</div>
+                    <canvas id="canvas" class="image-display"></canvas>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <button class="btn" id="downloadBtn">Download Result</button>
+                <button class="btn" id="newImageBtn" style="margin-left: 10px;">Upload New Image</button>
+            </div>
+        </div>
+
+        <div class="developer-credit">
+            <p>Developed by Clankak</p>
+            <a href="https://x.com/Clankak" target="_blank" rel="noopener noreferrer" class="developer-link">
+                <svg class="x-icon" viewBox="0 0 24 24">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                Follow @Clankak
+            </a>
+        </div>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="hiddenCanvas"></canvas>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const previewSection = document.getElementById('previewSection');
+        const originalImage = document.getElementById('originalImage');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const hiddenCanvas = document.getElementById('hiddenCanvas');
+        const hiddenCtx = hiddenCanvas.getContext('2d');
+        
+        const sizeSlider = document.getElementById('sizeSlider');
+        const xSlider = document.getElementById('xSlider');
+        const ySlider = document.getElementById('ySlider');
+        const opacitySlider = document.getElementById('opacitySlider');
+        const rotationSlider = document.getElementById('rotationSlider');
+        const borderSlider = document.getElementById('borderSlider');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const newImageBtn = document.getElementById('newImageBtn');
+
+        // Add value display elements
+        const sizeValue = document.getElementById('sizeValue');
+        const xValue = document.getElementById('xValue'); 
+        const yValue = document.getElementById('yValue');
+        const opacityValue = document.getElementById('opacityValue');
+        const rotationValue = document.getElementById('rotationValue');
+        const borderValue = document.getElementById('borderValue');
+
+        let uploadedImage = null;
+        let logoImage = null;
+        let faceDetectionLoaded = false;
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
+
+        // Load the existing logo image
+        function loadLogoImage() {
+            logoImage = new Image();
+            logoImage.onload = () => {
+                console.log('Logo image loaded successfully');
+            };
+            logoImage.onerror = () => {
+                console.error('Failed to load logo image. Please make sure image.png is in the same directory.');
+                // Fallback to drawing the logo if image fails to load
+                logoImage = null;
+            };
+            logoImage.src = 'image.png'; // Your existing logo file
+        }
+
+        // Initialize logo loading
+        loadLogoImage();
+
+        // Load face detection models
+        async function loadFaceDetection() {
+            try {
+                await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdnjs.cloudflare.com/ajax/libs/face-api.js/0.22.2/weights/');
+                faceDetectionLoaded = true;
+                console.log('Face detection loaded successfully');
+            } catch (error) {
+                console.log('Face detection not available, using default positioning');
+                faceDetectionLoaded = false;
+            }
+        }
+
+        // Initialize face detection on page load
+        loadFaceDetection();
+
+        // Function to draw the logo (either from image or fallback drawn version)
+        function drawLogo(context, x, y, size, opacity, rotation, borderWidth) {
+            context.save();
+            context.globalAlpha = opacity;
+            
+            // Apply rotation
+            const centerX = x + size / 2;
+            const centerY = y + size / 2;
+            context.translate(centerX, centerY);
+            context.rotate((rotation * Math.PI) / 180);
+            context.translate(-centerX, -centerY);
+            
+            if (logoImage && logoImage.complete) {
+                // Use the actual logo image
+                context.drawImage(logoImage, x, y, size, size);
+            } else {
+                // Fallback: draw the logo manually if image not available
+                const logoCenterX = x + size / 2;
+                const logoCenterY = y + size / 2;
+                
+                // Create blue gradient similar to the reference
+                const gradient = context.createLinearGradient(x, y, x + size, y + size);
+                gradient.addColorStop(0, '#7B92E8');  // Lighter blue
+                gradient.addColorStop(1, '#5A7BD8');  // Darker blue
+                
+                // Draw diamond shape
+                context.beginPath();
+                context.moveTo(logoCenterX, y + size * 0.1); // top
+                context.lineTo(x + size * 0.85, logoCenterY); // right
+                context.lineTo(logoCenterX, y + size * 0.9); // bottom
+                context.lineTo(x + size * 0.15, logoCenterY); // left
+                context.closePath();
+                
+                context.fillStyle = gradient;
+                context.fill();
+                
+                // Simple black line through the middle (like the reference)
+                context.strokeStyle = '#1a1a1a';
+                context.lineWidth = Math.max(1, size * 0.08 * (borderWidth / 8));
+                context.lineCap = 'round';
+                
+                // Vertical line through center
+                context.beginPath();
+                context.moveTo(logoCenterX, y + size * 0.15);
+                context.lineTo(logoCenterX, y + size * 0.85);
+                context.stroke();
+                
+                // Simple face elements - just two small rectangles for eyes
+                const eyeSize = size * 0.05;
+                const eyeY = y + size * 0.38;
+                
+                context.fillStyle = '#1a1a1a';
+                // Left eye
+                context.fillRect(x + size * 0.42 - eyeSize/2, eyeY, eyeSize, eyeSize * 1.5);
+                // Right eye  
+                context.fillRect(x + size * 0.58 - eyeSize/2, eyeY, eyeSize, eyeSize * 1.5);
+                
+                // Simple smile arc
+                context.strokeStyle = '#1a1a1a';
+                context.lineWidth = Math.max(1, size * 0.04 * (borderWidth / 8));
+                context.beginPath();
+                context.arc(logoCenterX, y + size * 0.58, size * 0.12, 0.2, Math.PI - 0.2);
+                context.stroke();
+            }
+            
+            context.restore();
+        }
+
+        // Event listeners
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('drop', handleDrop);
+        uploadArea.addEventListener('dragenter', () => uploadArea.classList.add('dragover'));
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+        
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        [sizeSlider, xSlider, ySlider, opacitySlider, rotationSlider, borderSlider].forEach(slider => {
+            slider.addEventListener('input', updateCanvas);
+            slider.addEventListener('input', updateSliderValues);
+        });
+        
+        // Canvas mouse events for dragging
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('mouseup', handleMouseUp);
+        canvas.addEventListener('mouseleave', handleMouseUp);
+        
+        // Touch events for mobile
+        canvas.addEventListener('touchstart', handleTouchStart);
+        canvas.addEventListener('touchmove', handleTouchMove);
+        canvas.addEventListener('touchend', handleTouchEnd);
+        
+        downloadBtn.addEventListener('click', downloadImage);
+        newImageBtn.addEventListener('click', resetApp);
+
+        // Update slider value displays
+        function updateSliderValues() {
+            if (sizeValue) sizeValue.textContent = sizeSlider.value + '%';
+            if (xValue) xValue.textContent = xSlider.value + '%';
+            if (yValue) yValue.textContent = ySlider.value + '%';
+            if (opacityValue) opacityValue.textContent = opacitySlider.value + '%';
+            if (rotationValue) rotationValue.textContent = rotationSlider.value + '°';
+            if (borderValue) borderValue.textContent = borderSlider.value + 'px';
+        }
+
+        // Preset position functions
+        function applyPreset(preset) {
+            switch(preset) {
+                case 'topLeft':
+                    xSlider.value = 20;
+                    ySlider.value = 20;
+                    break;
+                case 'topRight':
+                    xSlider.value = 80;
+                    ySlider.value = 20;
+                    break;
+                case 'center':
+                    xSlider.value = 50;
+                    ySlider.value = 50;
+                    break;
+                case 'bottomLeft':
+                    xSlider.value = 20;
+                    ySlider.value = 80;
+                    break;
+                case 'bottomRight':
+                    xSlider.value = 80;
+                    ySlider.value = 80;
+                    break;
+                case 'forehead':
+                    xSlider.value = 50;
+                    ySlider.value = 25;
+                    break;
+            }
+            updateSliderValues();
+            updateCanvas();
+        }
+
+        // Mouse drag handlers
+        function handleMouseDown(e) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            if (isPointInLogo(mouseX, mouseY)) {
+                isDragging = true;
+                canvas.style.cursor = 'grabbing';
+                
+                const logoSize = (canvas.width * parseInt(sizeSlider.value)) / 200;
+                const logoX = (canvas.width * parseInt(xSlider.value)) / 100 - logoSize / 2;
+                const logoY = (canvas.height * parseInt(ySlider.value)) / 100 - logoSize / 2;
+                
+                dragOffset.x = mouseX - (logoX + logoSize / 2);
+                dragOffset.y = mouseY - (logoY + logoSize / 2);
+            }
+        }
+
+        function handleMouseMove(e) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            if (isDragging) {
+                const newCenterX = mouseX - dragOffset.x;
+                const newCenterY = mouseY - dragOffset.y;
+                
+                const xPercent = Math.max(0, Math.min(100, (newCenterX / canvas.width) * 100));
+                const yPercent = Math.max(0, Math.min(100, (newCenterY / canvas.height) * 100));
+                
+                xSlider.value = Math.round(xPercent);
+                ySlider.value = Math.round(yPercent);
+                
+                updateSliderValues();
+                updateCanvas();
+            } else {
+                canvas.style.cursor = isPointInLogo(mouseX, mouseY) ? 'grab' : 'default';
+            }
+        }
+
+        function handleMouseUp() {
+            isDragging = false;
+            canvas.style.cursor = 'default';
+        }
+
+        // Touch handlers
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousedown', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent('mousemove', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            canvas.dispatchEvent(mouseEvent);
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            const mouseEvent = new MouseEvent('mouseup', {});
+            canvas.dispatchEvent(mouseEvent);
+        }
+
+        // Check if point is inside logo
+        function isPointInLogo(x, y) {
+            if (!uploadedImage) return false;
+            
+            const logoSize = (canvas.width * parseInt(sizeSlider.value)) / 200;
+            const logoX = (canvas.width * parseInt(xSlider.value)) / 100 - logoSize / 2;
+            const logoY = (canvas.height * parseInt(ySlider.value)) / 100 - logoSize / 2;
+            
+            return x >= logoX && x <= logoX + logoSize && y >= logoY && y <= logoY + logoSize;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                processFile(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                processFile(file);
+            }
+        }
+
+        function processFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file!');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                uploadedImage = new Image();
+                uploadedImage.onload = async () => {
+                    await detectFaceAndPosition();
+                    displayImages();
+                    previewSection.style.display = 'block';
+                    uploadArea.style.display = 'none';
+                };
+                uploadedImage.src = e.target.result;
+                originalImage.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function detectFaceAndPosition() {
+            if (!faceDetectionLoaded) {
+                // Default positioning if face detection not available
+                xSlider.value = 50; // center horizontally
+                ySlider.value = 25; // upper portion for head
+                return;
+            }
+
+            try {
+                // Create a temporary canvas for face detection
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCanvas.width = uploadedImage.width;
+                tempCanvas.height = uploadedImage.height;
+                tempCtx.drawImage(uploadedImage, 0, 0);
+
+                // Detect faces
+                const detections = await faceapi.detectAllFaces(tempCanvas, new faceapi.TinyFaceDetectorOptions());
+                
+                if (detections.length > 0) {
+                    // Use the first detected face
+                    const face = detections[0].box;
+                    
+                    // Position logo on the forehead area (above the face)
+                    const faceX = face.x + face.width / 2; // center of face horizontally
+                    const faceY = face.y - face.height * 0.3; // above the face for forehead
+                    
+                    // Convert to percentage for sliders
+                    const xPercent = Math.max(10, Math.min(90, (faceX / uploadedImage.width) * 100));
+                    const yPercent = Math.max(5, Math.min(50, (faceY / uploadedImage.height) * 100));
+                    
+                    // Auto-size based on face size
+                    const faceSize = Math.max(face.width, face.height);
+                    const logoSizePercent = Math.max(60, Math.min(150, (faceSize / Math.min(uploadedImage.width, uploadedImage.height)) * 300));
+                    
+                    // Update sliders
+                    xSlider.value = Math.round(xPercent);
+                    ySlider.value = Math.round(yPercent);
+                    sizeSlider.value = Math.round(logoSizePercent);
+                    
+                    console.log(`Face detected! Logo positioned at ${xPercent.toFixed(1)}%, ${yPercent.toFixed(1)}%`);
+                } else {
+                    // No face detected, use default head positioning
+                    xSlider.value = 50;
+                    ySlider.value = 25;
+                    console.log('No face detected, using default head positioning');
+                }
+            } catch (error) {
+                console.log('Face detection error, using default positioning:', error);
+                xSlider.value = 50;
+                ySlider.value = 25;
+            }
+        }
+
+        function displayImages() {
+            // Set canvas size to match image aspect ratio
+            const maxWidth = 350;
+            const maxHeight = 350;
+            
+            let { width, height } = uploadedImage;
+            
+            if (width > maxWidth || height > maxHeight) {
+                const ratio = Math.min(maxWidth / width, maxHeight / height);
+                width *= ratio;
+                height *= ratio;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            
+            // Set hidden canvas to original size for download
+            hiddenCanvas.width = uploadedImage.width;
+            hiddenCanvas.height = uploadedImage.height;
+            
+            // Initialize slider values display
+            updateSliderValues();
+            
+            updateCanvas();
+        }
+
+        function updateCanvas() {
+            if (!uploadedImage) return;
+
+            // Clear both canvases
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hiddenCtx.clearRect(0, 0, hiddenCanvas.width, hiddenCanvas.height);
+
+            // Draw original image on both canvases
+            ctx.drawImage(uploadedImage, 0, 0, canvas.width, canvas.height);
+            hiddenCtx.drawImage(uploadedImage, 0, 0, hiddenCanvas.width, hiddenCanvas.height);
+
+            // Get slider values
+            const size = parseInt(sizeSlider.value);
+            const xPos = parseInt(xSlider.value);
+            const yPos = parseInt(ySlider.value);
+            const opacity = parseInt(opacitySlider.value) / 100;
+            const rotation = parseInt(rotationSlider.value);
+            const borderWidth = parseInt(borderSlider.value);
+
+            // Calculate logo position and size for display canvas
+            const logoSize = (canvas.width * size) / 200;
+            const logoX = (canvas.width * xPos) / 100 - logoSize / 2;
+            const logoY = (canvas.height * yPos) / 100 - logoSize / 2;
+
+            // Calculate logo position and size for hidden canvas (full resolution)
+            const hiddenLogoSize = (hiddenCanvas.width * size) / 200;
+            const hiddenLogoX = (hiddenCanvas.width * xPos) / 100 - hiddenLogoSize / 2;
+            const hiddenLogoY = (hiddenCanvas.height * yPos) / 100 - hiddenLogoSize / 2;
+
+            // Draw logo on display canvas
+            drawLogo(ctx, logoX, logoY, logoSize, opacity, rotation, borderWidth);
+
+            // Draw logo on hidden canvas
+            drawLogo(hiddenCtx, hiddenLogoX, hiddenLogoY, hiddenLogoSize, opacity, rotation, borderWidth);
+        }
+
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'pfp-with-logo.png';
+            link.href = hiddenCanvas.toDataURL();
+            link.click();
+        }
+
+        function resetApp() {
+            previewSection.style.display = 'none';
+            uploadArea.style.display = 'block';
+            fileInput.value = '';
+            uploadedImage = null;
+            
+            // Reset sliders
+            sizeSlider.value = 100;
+            xSlider.value = 50;
+            ySlider.value = 30;
+            opacitySlider.value = 80;
+            rotationSlider.value = 0;
+            borderSlider.value = 8;
+            updateSliderValues();
+        }
+    </script>
+</body>
+</html>
